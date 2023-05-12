@@ -144,3 +144,6 @@ gam %>% ggplot(aes(x=current_rating, y = pas_total, color = games_week)) +
   geom_smooth(method = 'lm')+
   facet_wrap( ~ age_group) + 
   labs(x = "Текущий рейтинг", y = "Уровень вовлечённоси", title = "График искомых закономерностей") 
+
+
+Проверка для гита
