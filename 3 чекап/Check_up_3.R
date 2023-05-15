@@ -83,7 +83,11 @@ gam %>% summarise(mean = mean(pas_total),
                   median = median(pas_total),
                   sd = sd(pas_total),
                   min = min(pas_total),
-                  max = max(pas_total)) %>% 
+                  max = max(pas_total),
+                  range = max(pas_total) - min(pas_total),
+                  IQR = stats::IQR(pas_total),
+                  skewness = datawizard::skewness(pas_total)$Skewness,
+                  kurtosis = datawizard::kurtosis(pas_total)$Kurtosis) %>% 
   write_csv('Статистики по ЗП (уровень вовлечённости).csv')
 #График
 gam %>% ggplot(aes(x=pas_total)) +
@@ -98,7 +102,11 @@ gam %>% ggplot(aes(x=pas_total)) +
        title = "Вовлечённость на выборке")
 
 #Статистики по НП (возрастные группы)
-#По фактору чёт не очень понятно, ограничимся граффиком
+#По фактору чёт не очень понятно, ограничимся граффиком и ассиметрией с эксцессом
+gam %>% summarise(skewness = datawizard::skewness(age_group)$Skewness,
+                  kurtosis = datawizard::kurtosis(age_group)$Kurtosis) %>%
+  write_csv('Статистики по НП (Возрастные группы).csv')
+#График
 gam %>% ggplot(aes(x=age_group)) +
   geom_bar() + 
   theme_bw() +
@@ -106,7 +114,11 @@ gam %>% ggplot(aes(x=age_group)) +
        title = "Распределение по возрастам")
 
 #Статистики по НП (количество игр в неделю)
-#По фактору чёт не очень понятно, ограничимся граффиком
+#По фактору чёт не очень понятно, ограничимся граффиком и ассиметрией с эксцессом
+gam %>% summarise(skewness = datawizard::skewness(games_week)$Skewness,
+                  kurtosis = datawizard::kurtosis(games_week)$Kurtosis) %>%
+  write_csv('Статистики по НП (количество игр в неделю).csv')
+#График
 gam %>% ggplot(aes(x=games_week)) +
   geom_bar() + 
   theme_bw() +
@@ -122,7 +134,11 @@ gam %>% summarise(mean = mean(current_rating),
                   median = median(current_rating),
                   sd = sd(current_rating),
                   min = min(current_rating),
-                  max = max(current_rating)) %>% 
+                  max = max(current_rating),
+                  range = max(current_rating) - min(current_rating),
+                  IQR = stats::IQR(current_rating),
+                  skewness = datawizard::skewness(current_rating)$Skewness,
+                  kurtosis = datawizard::kurtosis(current_rating)$Kurtosis) %>% 
   write_csv('Статистики по НП (рейтинг - текущий).csv')
 #График
 gam %>% ggplot(aes(x=current_rating)) +
@@ -144,6 +160,3 @@ gam %>% ggplot(aes(x=current_rating, y = pas_total, color = games_week)) +
   geom_smooth(method = 'lm')+
   facet_wrap( ~ age_group) + 
   labs(x = "Текущий рейтинг", y = "Уровень вовлечённоси", title = "График искомых закономерностей") 
-
-
-Проверка для гита
