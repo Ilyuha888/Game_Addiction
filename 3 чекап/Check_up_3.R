@@ -156,7 +156,9 @@ gam %>% ggplot(aes(x=current_rating)) +
 gam %>% ggplot(aes(x=current_rating, y = pas_total, color = games_week)) +
   scale_color_manual(values = colorspace::rainbow_hcl(length(unique(diamonds$color))),
                      labels = c("1-5", "6-10", "11-20", "20-30", "> 30", "> 50")) +
-  geom_point()+
+  ylim(9, 45) +
+  xlim(0, 8000) +
+  geom_point(alpha = 0.2)+
   geom_smooth(method = 'lm')+
   facet_wrap( ~ age_group) + 
   labs(x = "Текущий рейтинг", y = "Уровень вовлечённоси", title = "График искомых закономерностей") 
