@@ -1,5 +1,6 @@
 library(tidyverse)
 library(pwr)
+library(ez)
 
 #ЧИСТКА ДАННЫХ
 
@@ -55,7 +56,7 @@ gam %>% filter(age <101 &
 #games_week переведём в фактор
 gam %>% mutate(games_week = factor(games_week,
                                   levels = c('1-5 игр (по выходным чисто пару каток)', '6-10 игр (пару дней в неделю стабильно-дота)', '11-20 игр (почти каждый день по несколько игр)', '20-30 игр (каждый день по несколько игр)', 'Больше 30 игр (по много пабликов каждый день)', 'Больше 50 игр (хочу быть как ILTW, тренируюсь каждый день нон-стоп)'), 
-                                  ordered = TRUE)) -> gam
+                                  ordered = FALSE)) -> gam
 #Создадим столбец age_group
 gam %>% mutate(age_group = case_when(age < 18 ~ '17 лет или младше',
                                      age < 21 ~ '18-20 лет',
@@ -67,7 +68,7 @@ gam %>% mutate(age_group = case_when(age < 18 ~ '17 лет или младше',
 #age_group переведём в фактор
 gam %>% mutate(age_group = factor(age_group,
                                    levels = c('17 лет или младше', '18-20 лет', '21-29 лет', '30-39 лет', '40-49 лет', '50-59 лет', '60 лет или старше'), 
-                                   ordered = TRUE)) -> gam
+                                   ordered = FALSE)) -> gam
 #Создадим столбец с итоговым баллом вовлечённости (зависимости)
 gam %>% mutate(pas_total = rowSums(across(c(pas01:pas09)))) -> gam
 
@@ -95,8 +96,8 @@ gam %>% ggplot(aes(x=pas_total)) +
   geom_density(aes(y=..density..)) +
   geom_vline(xintercept=mean(gam$pas_total), size=1.0, color="red") +
   geom_vline(xintercept=median(gam$pas_total), size=1.0, color="blue") +
-  geom_text(aes(x=mean(gam$pas_total)+7, , color="red", label=paste0("Среднее"), y=0.090)) +
-  geom_text(aes(x=mean(gam$pas_total)+7, , color="blue", label=paste0("Медиана"), y=0.080)) +
+  geom_text(aes(x=mean(pas_total)+7, color="red", label=paste0("Среднее"), y=0.090)) +
+  geom_text(aes(x=mean(pas_total)+7, color="blue", label=paste0("Медиана"), y=0.080)) +
   theme(legend.position = "none") + 
   labs(x = "Уровень вовлечённости", y = "Плотность вероятности",
        title = "Вовлечённость на выборке")
@@ -146,15 +147,15 @@ gam %>% ggplot(aes(x=current_rating)) +
   geom_density(aes(y=..density..)) +
   geom_vline(xintercept=mean(gam$current_rating), size=1.0, color="red") +
   geom_vline(xintercept=median(gam$current_rating), size=1.0, color="blue") +
-  geom_text(aes(x=mean(gam$current_rating)+1600, , color="red", label="Среднее", y=0.00030)) +
-  geom_text(aes(x=mean(gam$current_rating)+1600, , color="blue", label="Медиана", y=0.00027)) +
+  geom_text(aes(x=mean(current_rating)+1600, color="red", label="Среднее", y=0.00030)) +
+  geom_text(aes(x=mean(current_rating)+1600, color="blue", label="Медиана", y=0.00027)) +
   theme(legend.position = "none") + 
   labs(x = "Текущий рейтинг", y = "Плотность вероятности",
        title = "Текущий рейтинг на выборке")
 
 #Искомый график
 gam %>% ggplot(aes(x=current_rating, y = pas_total, color = games_week)) +
-  scale_color_manual(values = colorspace::rainbow_hcl(length(unique(diamonds$color))),
+  scale_color_manual(values = colorspace::rainbow_hcl(length(unique(gam$games_week))),
                      labels = c("1-5", "6-10", "11-20", "20-30", "> 30", "> 50")) +
   ylim(9, 45) +
   xlim(0, 8000) +
@@ -250,3 +251,47 @@ pwr.f2.test(u = 5, v = 5715, sig.level = 0.01, f2 = 0.158/(1 - 0.158))
 
 
 
+#Давайте построим графики для гипотез, почему бы и нет собственно
+
+#Гипотеза о рейтинге
+gam %>% ggplot(aes(x=current_rating, y = pas_total)) +
+  ylim(9, 45) +
+  xlim(0, 8000) +
+  geom_point(alpha = 0.2)+
+  geom_smooth(method = 'lm')+
+  labs(x = "Текущий рейтинг", y = "Уровень вовлечённоси", title = "Показатель вовлечённости от рейтинга") 
+
+#Гипотеза о возрастных группах
+ggplot(gam,
+       aes(age_group, pas_total,
+           group = 1)) +
+  stat_summary(fun = mean, geom = 'point') +
+  stat_summary(fun.data = mean_cl_boot, geom = 'errorbar') +
+  stat_summary(fun = mean, geom = 'line') +
+  labs(x = "Возрастная группа", y = "Показатель вовлечённости",
+       title = "Показатель вовлечённости среди разных возрастных групп")
+
+#Гипотеза об играх в неделю
+ggplot(gam,
+       aes(games_week, pas_total,
+           group = 1)) +
+  stat_summary(fun = mean, geom = 'point') +
+  stat_summary(fun.data = mean_cl_boot, geom = 'errorbar') +
+  stat_summary(fun = mean, geom = 'line') +
+  labs(x = "Игр в неделю", y = "Показатель вовлечённости",
+       title = "Показатель вовлечённости среди от игр в неделю") +
+  scale_x_discrete(labels=c("1-5", "6-10", "11-20", "20-30", "> 30", "> 50"))
+
+#Гипотеза о взаимодействии
+
+ggplot(gam,
+       aes(games_week, pas_total, color = age_group,
+           group = interaction(games_week, age_group))) +
+  stat_summary(fun = mean, geom = 'point', position = position_dodge(0.3)) +
+  stat_summary(fun.data = mean_cl_boot,position = position_dodge(0.3), geom = 'errorbar') +
+  labs(x = "Игр в неделю", y = "Показатель вовлечённости",
+       title = "Показатель вовлечённости среди от игр в неделю и возрастной группы") +
+  scale_x_discrete(labels=c("1-5", "6-10", "11-20", "20-30", "> 30", "> 50")) +
+  scale_color_manual(values = c('green', 'red', 'blue', 'orange'))
+
+  
