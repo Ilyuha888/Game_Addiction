@@ -87,6 +87,7 @@ write_csv(gam, 'gam_clean.csv')
 
 #ОПИСАТЕЛЬНЫЕ СТАТИСТИКИ
 
+theme_set(theme_bw())
 
 #Статистики по ЗП (уровень вовлечённости)
 gam %>% summarise(mean = mean(pas_total),
@@ -347,4 +348,37 @@ tibble(LC_num = c(2:13),
 write_csv(gam_LCA, 'gam_LCA_res.csv')
 
 #Построим графики и выберем модель
+#Но для начала превратим long-формат
 
+gam_LCA_long <- pivot_longer(gam_LCA, cols = c('AIC','BIC'))
+
+ggplot(gam_LCA_long, aes(as_factor(LC_num), value, shape = name, group = name)) + 
+  geom_point() +
+  geom_line() +
+  labs(x = "Количество классов", y = "AIC/BIC",
+       title = "Выберем модельку", shape = 'Информационные\nкритерии')
+#Ну. Выбрали модельку. 7 классов. Давайте на неё смотреть
+
+gam_relation7 <- poLCA (f, gam, nclass = 7, maxiter = 50000, graphs = TRUE, nrep =  10, verbose = TRUE)
+
+#Сделаем табличку, где напротив каждого класса вероятность того или иного значения
+
+#Пустой тибл
+prob <- tibble(class = c(1:7), rel01 = 0, rel02 = 0, rel03 = 0, rel04 = 0, rel05 = 0, rel06 = 0, rel07 = 0,rel08 = 0, rel09 = 0, rel10 = 0, rel11 = 0, rel12 = 0, rel13 = 0)
+
+#Пройдёмся по всем вопросам и создадим столбец с самыми вероятными значениями ответа на вопрос для всех классов              
+for (i in 1:13) {
+  #Для каждого вопроса создали тибл, где столбцы отвечают за тот или иной уровень
+  a = unlist(gam_relation7$probs[i], recursive = TRUE, use.names = FALSE) #превращаем в вектор список вероятность для одного вопроса
+  a_t = tibble(low = c(a[1:7]),
+               med = c(a[8:14]),
+               high = c(a[15:21]))
+  a_t %>% mutate(a = ifelse(low > 0.6, 1, ifelse(med > 0.6, 2, ifelse(high > 0.6, 3, 0)))) -> a_t
+  prob[1+i] <- a_t$a
+  }
+
+#Сохраним
+write_csv(prob, 'class_most_prob_answ.csv')
+
+#Добавим класс в общий датасет
+gam %>% mutate(class = gam_relation7$predclass) -> gam
