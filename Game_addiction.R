@@ -335,3 +335,16 @@ gam_relation11 <- poLCA (f, gam, nclass = 11, maxiter = 50000, graphs = FALSE, n
 gam_relation12 <- poLCA (f, gam, nclass = 12, maxiter = 50000, graphs = FALSE, nrep =  10, verbose = TRUE)
 gam_relation13 <- poLCA (f, gam, nclass = 13, maxiter = 50000, graphs = FALSE, nrep =  10, verbose = TRUE)
 
+#Создадим тибл с итоговыми показателями качества модели
+
+tibble(LC_num = c(2:13), 
+       AIC = c(gam_relation2$aic, gam_relation3$aic, gam_relation4$aic, gam_relation5$aic, gam_relation6$aic, gam_relation7$aic, gam_relation8$aic, gam_relation9$aic, gam_relation10$aic, gam_relation11$aic, gam_relation12$aic, gam_relation13$aic), 
+       BIC = c(gam_relation2$bic, gam_relation3$bic, gam_relation4$bic, gam_relation5$bic, gam_relation6$bic, gam_relation7$bic, gam_relation8$bic, gam_relation9$bic, gam_relation10$bic, gam_relation11$bic, gam_relation12$bic, gam_relation13$bic)
+       )-> gam_LCA
+
+#Сохраним, чтобы потом не считать модельки заново 
+
+write_csv(gam_LCA, 'gam_LCA_res.csv')
+
+#Построим графики и выберем модель
+
