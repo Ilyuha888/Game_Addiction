@@ -1,3 +1,12 @@
+#Устанавливаем библиотеки. Закоментил, потому что уже установил
+
+#install.packages('poLCA')
+#install.packages('tidyverse')
+#install.packages('pwr')
+#install.packages('ez')
+
+#Подгружаем библиотеки
+library(poLCA)
 library(tidyverse)
 library(pwr)
 library(ez)
@@ -294,4 +303,35 @@ ggplot(gam,
   scale_x_discrete(labels=c("1-5", "6-10", "11-20", "20-30", "> 30", "> 50")) +
   scale_color_manual(values = c('green', 'red', 'blue', 'orange'))
 
-  
+
+
+#ПРОДВИНУТЫЙ АНАЛИЗ. ЙОПТА
+
+#Давайте посмотрим, как наши ребята делятся по отношению к игре
+
+#Для этой процедуры мы решили использовать LCA. Понадобится небольшая предобработка
+#Вопросы были по 5-тибальной ликертовской шкале. Интерпретировать будет тяжеловата
+#Щедрым жестом перегоним в трёхбальную
+
+gam %>% mutate(across( rel01:rel13, function(x) ifelse(x == 3, 2, ifelse(x > 3, 3, 1)))) -> gam#Аналоги лямбда функции в питоне
+
+#Ну, а теперь собственно будем использовать сам метод
+
+#Запишем формулу для LCA
+
+f <- cbind(rel01, rel02, rel03, rel04, rel05, rel06, rel07, rel08, rel09, rel10, rel11, rel12, rel13)~1
+
+#Прогоним мето, используя разное количество предполагаемых классов: от 2 до 13
+gam_relation2 <- poLCA (f, gam, nclass = 2, maxiter = 50000, graphs = FALSE, nrep =  10, verbose = TRUE)
+gam_relation3 <- poLCA (f, gam, nclass = 3, maxiter = 50000, graphs = FALSE, nrep =  10, verbose = TRUE)
+gam_relation4 <- poLCA (f, gam, nclass = 4, maxiter = 50000, graphs = FALSE, nrep =  10, verbose = TRUE)
+gam_relation5 <- poLCA (f, gam, nclass = 5, maxiter = 50000, graphs = FALSE, nrep =  10, verbose = TRUE)
+gam_relation6 <- poLCA (f, gam, nclass = 6, maxiter = 50000, graphs = FALSE, nrep =  10, verbose = TRUE)
+gam_relation7 <- poLCA (f, gam, nclass = 7, maxiter = 50000, graphs = FALSE, nrep =  10, verbose = TRUE)
+gam_relation8 <- poLCA (f, gam, nclass = 8, maxiter = 50000, graphs = FALSE, nrep =  10, verbose = TRUE)
+gam_relation9 <- poLCA (f, gam, nclass = 9, maxiter = 50000, graphs = FALSE, nrep =  10, verbose = TRUE)
+gam_relation10 <- poLCA (f, gam, nclass = 10, maxiter = 50000, graphs = FALSE, nrep =  10, verbose = TRUE)
+gam_relation11 <- poLCA (f, gam, nclass = 11, maxiter = 50000, graphs = FALSE, nrep =  10, verbose = TRUE)
+gam_relation12 <- poLCA (f, gam, nclass = 12, maxiter = 50000, graphs = FALSE, nrep =  10, verbose = TRUE)
+gam_relation13 <- poLCA (f, gam, nclass = 13, maxiter = 50000, graphs = FALSE, nrep =  10, verbose = TRUE)
+
