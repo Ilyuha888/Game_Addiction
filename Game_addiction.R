@@ -4,12 +4,14 @@
 #install.packages('tidyverse')
 #install.packages('pwr')
 #install.packages('ez')
+#install.packages('emmeans')
 
 #Подгружаем библиотеки
 library(poLCA)
 library(tidyverse)
 library(pwr)
 library(ez)
+library(emmeans)
 
 #ЧИСТКА ДАННЫХ
 
@@ -186,6 +188,7 @@ gam %>% filter(age_group %in% c('17 лет или младше', '18-20 лет',
 #Сначала рейтинг
 model1 <- lm(pas_total ~ current_rating, gam)
 summary(model1)
+#Проверим допущения
 plot(model1)
 #Модель слабовата, но стастически значима
 #Однако при очень большой выборке мы замечаем даже слабые эффекты, предсказывает 0.06% дисперсии
@@ -193,6 +196,9 @@ plot(model1)
 #Теперь посмотрим возрастную группу
 model2 <- lm(pas_total ~ age_group, gam)
 summary(model2)
+#Сравним группы между собой
+emmeans(model2, pairwise ~ age_group)
+#Проверим допущения
 plot(model2)
 #Здесь модель уже имеет большую значимость, но предсказывает очень маленькую дисперсию (0.8% дисперсии)
 #Значимы предиктором является принадлежность к первой и второй возрастным группам
@@ -200,6 +206,9 @@ plot(model2)
 #Теперь посмотрим количество игр в неделю
 model3 <- lm(pas_total ~ games_week, gam)
 summary(model3)
+#Сравним группы между собой
+emmeans(model3, pairwise ~ games_week)
+#Проверим допущения
 plot(model3)
 #Эта модель уже лучше, она предсказывает 15.8% дисперсии, кайф! (начало)
 #Значимые предикторы - это принадлженость к тем, кто играет 1-5, 6-10 и 11-20
@@ -208,6 +217,7 @@ plot(model3)
 #Теперь посмотрим игры в неделю вместе с возрастной группой
 model4 <- lm(pas_total ~ games_week + age_group, gam)
 summary(model4)
+#Проверим допущения
 plot(model4)
 #Модель не лучше предыдущей, и значимы те-же предикторы, объясняет 16.0% дисперсии 
 #Проверим вздутость (если предикторы коррелируют между собой сильно)
@@ -226,6 +236,7 @@ summary(model6)
 #Проверим вздутость
 car::vif(model6)
 #Её нет, но задатки появляются
+#Проверим допущения
 plot(model6)
 
 
@@ -273,21 +284,17 @@ gam %>% ggplot(aes(x=current_rating, y = pas_total)) +
 
 #Гипотеза о возрастных группах
 ggplot(gam,
-       aes(age_group, pas_total,
-           group = 1)) +
+       aes(age_group, pas_total)) +
   stat_summary(fun = mean, geom = 'point') +
   stat_summary(fun.data = mean_cl_boot, geom = 'errorbar') +
-  stat_summary(fun = mean, geom = 'line') +
   labs(x = "Возрастная группа", y = "Показатель вовлечённости",
        title = "Показатель вовлечённости среди разных возрастных групп")
 
 #Гипотеза об играх в неделю
 ggplot(gam,
-       aes(games_week, pas_total,
-           group = 1)) +
+       aes(games_week, pas_total)) +
   stat_summary(fun = mean, geom = 'point') +
   stat_summary(fun.data = mean_cl_boot, geom = 'errorbar') +
-  stat_summary(fun = mean, geom = 'line') +
   labs(x = "Игр в неделю", y = "Показатель вовлечённости",
        title = "Показатель вовлечённости среди от игр в неделю") +
   scale_x_discrete(labels=c("1-5", "6-10", "11-20", "20-30", "> 30", "> 50"))
