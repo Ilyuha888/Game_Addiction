@@ -56,11 +56,11 @@ gam_main %>% ggplot(aes(x=age_group)) +
 
 #Статистики по НП (количество игр в неделю)
 #По фактору чёт не очень понятно, ограничимся граффиком и ассиметрией с эксцессом
-gam_main %>% summarise(skewness = datawizard::skewness(gam_maines_week)$Skewness,
-                  kurtosis = datawizard::kurtosis(gam_maines_week)$Kurtosis) %>%
+gam_main %>% summarise(skewness = datawizard::skewness(gam_week)$Skewness,
+                  kurtosis = datawizard::kurtosis(games_week)$Kurtosis) %>%
   write_csv('Статистики по НП (количество игр в неделю).csv')
 #График
-gam_main %>% ggplot(aes(x=gam_maines_week)) +
+gam_main %>% ggplot(aes(x=games_week)) +
   geom_bar() + 
   theme_bw() +
   scale_x_discrete(labels=c("1-5", "6-10", "11-20", "20-30", "> 30", "> 50")) +
@@ -96,8 +96,8 @@ gam_main %>% ggplot(aes(x=current_rating)) +
 
 
 #Искомый график
-gam_main %>% ggplot(aes(x=current_rating, y = pas_total, color = gam_maines_week)) +
-  scale_color_manual(values = colorspace::rainbow_hcl(length(unique(gam_main$gam_maines_week))),
+gam_main %>% ggplot(aes(x=current_rating, y = pas_total, color = games_week)) +
+  scale_color_manual(values = colorspace::rainbow_hcl(length(unique(gam_main$games_week))),
                      labels = c("1-5", "6-10", "11-20", "20-30", "> 30", "> 50")) +
   ylim(9, 45) +
   xlim(0, 8000) +
@@ -140,10 +140,10 @@ plot(model2)
 
 
 #Теперь посмотрим количество игр в неделю
-model3 <- lm(pas_total ~ gam_maines_week, gam_main)
+model3 <- lm(pas_total ~ games_week, gam_main)
 summary(model3)
 #Сравним группы между собой
-emmeans(model3, pairwise ~ gam_maines_week)
+emmeans(model3, pairwise ~ games_week)
 #Проверим допущения
 plot(model3)
 #Эта модель уже лучше, она предсказывает 15.8% дисперсии, кайф! (начало)
@@ -151,7 +151,7 @@ plot(model3)
 
 
 #Теперь посмотрим игры в неделю вместе с возрастной группой
-model4 <- lm(pas_total ~ gam_maines_week + age_group, gam_main)
+model4 <- lm(pas_total ~ games_week + age_group, gam_main)
 summary(model4)
 #Проверим допущения
 plot(model4)
@@ -162,13 +162,13 @@ car::vif(model4)
 
 
 #Теперь посмотрим все три
-model5 <- lm(pas_total ~ gam_maines_week + age_group + current_rating, gam_main)
+model5 <- lm(pas_total ~ games_week + age_group + current_rating, gam_main)
 summary(model5)
 #Добавление рейтинга модель не улучшило(
 
 
 #Теперь посмотрим игры в неделю, возрастную группу и их взаимодействие
-model6 <- lm(pas_total ~ gam_maines_week + age_group + gam_maines_week*age_group, gam_main)
+model6 <- lm(pas_total ~ games_week + age_group + games_week*age_group, gam_main)
 summary(model6)
 #Модель оказалась хуже чем модель без взаимодействия... Объясняем 15.8% дисперсии
 #Проверим вздутость
@@ -179,7 +179,7 @@ plot(model6)
 
 
 #А теперь добавим в к ним рейтинг
-model7 <- lm(pas_total ~ gam_maines_week + age_group + current_rating + gam_maines_week*age_group, gam_main)
+model7 <- lm(pas_total ~ games_week + age_group + current_rating + games_week*age_group, gam_main)
 summary(model7)
 #Модель плохая, предикторы лишние, гипотеза не подтверждается, мы плачем((((
 #Дисперсия 15.9%
@@ -196,7 +196,7 @@ summary(model8)
 
 
 #Теперь посмотрим игры в неделю, возраст и их взаимодействие
-model9 <- lm(pas_total ~ gam_maines_week + age + gam_maines_week*age, gam_main)
+model9 <- lm(pas_total ~ games_week + age + games_week*age, gam_main)
 summary(model9)
 #Модель объясняет 16% дисперсии и плохо интерпретируется
 
@@ -239,7 +239,7 @@ ggplot(gam_main,
 
 #Гипотеза об играх в неделю
 ggplot(gam_main,
-       aes(gam_maines_week, pas_total)) +
+       aes(games_week, pas_total)) +
   stat_summary(fun = mean, geom = 'point') +
   stat_summary(fun.data = mean_cl_boot, geom = 'errorbar') +
   labs(x = "Игр в неделю", y = "Показатель вовлечённости",
@@ -249,8 +249,8 @@ ggplot(gam_main,
 
 #Гипотеза о взаимодействии
 ggplot(gam_main,
-       aes(gam_maines_week, pas_total, color = age_group,
-           group = interaction(gam_maines_week, age_group))) +
+       aes(games_week, pas_total, color = age_group,
+           group = interaction(games_week, age_group))) +
   stat_summary(fun = mean, geom = 'point', position = position_dodge(0.3)) +
   stat_summary(fun.data = mean_cl_boot,position = position_dodge(0.3), geom = 'errorbar') +
   labs(x = "Игр в неделю", y = "Показатель вовлечённости",
