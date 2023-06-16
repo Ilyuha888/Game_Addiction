@@ -22,10 +22,9 @@ library(flextable)
 library(apaTables)
 
 #Загружаем чистый файл
-gam_add <- read_csv2("gam_clean.csv")
+gam_add <- read_csv2("data-tables/gam_clean.csv")
 #Поставим тему для граффиков
 theme_set(theme_bw())
-
 
 ##LCA(Latent Class Analysis) ----- 
 
@@ -96,9 +95,11 @@ tibble(LC_num = c(2:13),
 
 
 #Сохраним, чтобы потом не считать модельки заново 
-write_csv(gam_add_LCA, 'gam_add_LCA_res.csv')
+write_csv(gam_add_LCA, 'data-tables/gam_add_LCA_res.csv')
 
 
+#Считаем табличку
+gam_add_LCA <- read_csv('data-tables/gam_add_LCA_res.csv')
 
 
 #Построим графики и выберем модель
@@ -112,17 +113,14 @@ ggplot(gam_add_LCA_long, aes(as_factor(LC_num), value,
   geom_line() +
   labs(x = "Количество классов", y = "AIC/BIC",
        title = "Выберем модельку", shape = 'Информационные\nкритерии')
-
+ggsave("images/Выберем модельку.png")
 
 #Ну. Выбрали модельку. 7 классов. Давайте на неё смотреть
 gam_add_relation7 <- poLCA (f, gam_add, nclass = 7, maxiter = 50000, 
                             graphs = TRUE, nrep =  10, verbose = TRUE)
 
-
 #Добавим класс в общий датасет
 gam_add %>% mutate(class = gam_add_relation7$predclass) -> gam_add
-
-
 
 
 #Сделаем табличку, где напротив каждого класса вероятность того 
@@ -150,7 +148,7 @@ for (i in 1:13) {
 }
 
 #Сохраним
-write_csv(prob, 'class_most_prob_answ.csv')
+write_csv(prob, 'data-tables/class_most_prob_answ.csv')
 
 
 ##Пробуем Байесовскую Анову на датасете с классом, как предиктором ----- 
@@ -240,7 +238,7 @@ ggplot(gam_add,
   stat_summary(fun.data = mean_cl_boot, geom = 'errorbar') +
   labs(x = "Класс", y = "Возраст",
        title = "Распределение возраста по классам")
-
+ggsave("images/Распределение возраста по классам.png")
 
 #Гипотеза о рейтинге
 ggplot(gam_add,
@@ -249,7 +247,7 @@ ggplot(gam_add,
   stat_summary(fun.data = mean_cl_boot, geom = 'errorbar') +
   labs(x = "Класс", y = "максимальный рейтинг",
        title = "Распределение рейтинга по классам")
-
+ggsave("images/Распределение рейтинга по классам.png")
 
 #Гипотеза о часах в игре
 ggplot(gam_add,
@@ -258,7 +256,7 @@ ggplot(gam_add,
   stat_summary(fun.data = mean_cl_boot, geom = 'errorbar') +
   labs(x = "Класс", y = "Часов в игре",
        title = "Распределение часов по классам")
-
+ggsave("images/Распределение часов по классам.png")
 
 #Гипотеза о вовлечённость
 ggplot(gam_add,
@@ -267,7 +265,7 @@ ggplot(gam_add,
   stat_summary(fun.data = mean_cl_boot, geom = 'errorbar') +
   labs(x = "Класс", y = "Вовлечённость",
        title = "Распределение вовлечённости по классам")
-
+ggsave("images/Распределение вовлечённости по классам.png")
 
 ##Таблички ----
 #Для попарных сравнений
@@ -284,27 +282,27 @@ names(add_pas_comp_tbl) <- c("Contrast", "Estimate", "SE", "Df", "t", "p")
 save_as_docx(nice_table(add_age_comp_tbl, 
                         note = c("* p < .05, ** p < .01, *** p < .001", 
                                  "P value adjustment: Tukey method for comparing a family of 7 estimates ")), 
-             path = "add_age_comp_tbl.docx")
+             path = "apa-tables/add_age_comp_tbl.docx")
 save_as_docx(nice_table(add_rating_comp_tbl, 
                         note = c("* p < .05, ** p < .01, *** p < .001", 
                                  "P value adjustment: Tukey method for comparing a family of 7 estimates ")), 
-             path = "add_rating_comp_tbl.docx")
+             path = "apa-tables/add_rating_comp_tbl.docx")
 save_as_docx(nice_table(add_hours_comp_tbl, 
                         note = c("* p < .05, ** p < .01, *** p < .001", 
                                  "P value adjustment: Tukey method for comparing a family of 7 estimates ")), 
-             path = "add_hours_comp_tbl.docx")
+             path = "apa-tables/add_hours_comp_tbl.docx")
 save_as_docx(nice_table(add_pas_comp_tbl, 
                         note = c("* p < .05, ** p < .01, *** p < .001", 
                                  "P value adjustment: Tukey method for comparing a family of 7 estimates ")), 
-             path = "add_pas_comp_tbl.docx")
+             path = "apa-tables/add_pas_comp_tbl.docx")
 
 
 #Для обычных ANOVA
 
-apa.ezANOVA.table(age_anova, filename="age_anova.doc")
-apa.ezANOVA.table(rating_anova, filename="rating_anova.doc")
-apa.ezANOVA.table(hours_anova, filename="hours_anova.doc")
-apa.ezANOVA.table(pas_anova, filename="pas_anova.doc")
+apa.ezANOVA.table(age_anova, filename="apa-tables/age_anova.doc")
+apa.ezANOVA.table(rating_anova, filename="apa-tables/rating_anova.doc")
+apa.ezANOVA.table(hours_anova, filename="apa-tables/hours_anova.doc")
+apa.ezANOVA.table(pas_anova, filename="apa-tables/pas_anova.doc")
 
 
 #Для Байесовских ANOVA
@@ -317,4 +315,4 @@ banova <- tibble(a = c('Age', 'Rating', 'Hours', 'Passion'),
 colnames(banova) <- c('Dv', 'Bayes Factor', 'Bayes Factor error, %')
 
 
-save_as_docx(nice_table(banova), path = "banova.docx")
+save_as_docx(nice_table(banova), path = "apa-tables/banova.docx")

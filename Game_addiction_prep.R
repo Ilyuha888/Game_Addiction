@@ -8,7 +8,7 @@ library(tidyverse)
 #ЧИСТКА ДАННЫХ
 
 #Читаем таблицу
-gam <- read_csv2("gameadddiction.csv")
+gam <- read_csv2("data-tables/gameadddiction.csv")
 #Создаём вектор с новыми именами
 new_names <- c('time','ID','sex','age', 'max_rating', 'current_rating', 
                'hours_in_game', 'g_w', 'pas01', 'pas02', 'pas03', 
@@ -112,4 +112,4 @@ gam %>% mutate(pas_total = rowSums(across(c(pas01:pas09)))) -> gam
 
 
 #Сохраняем почищенный файл
-write_csv2(gam, 'gam_clean.csv')
+write_csv2(gam, 'data-tables/gam_clean.csv')

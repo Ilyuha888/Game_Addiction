@@ -15,7 +15,7 @@ library(broom)
 library(flextable)
 
 #Загружаем чистый файл
-gam_main <- read_csv2("gam_clean.csv")
+gam_main <- read_csv2("data-tables/gam_clean.csv")
 #Поставим тему для граффиков
 theme_set(theme_bw())
 
@@ -34,7 +34,7 @@ gam_main %>% summarise(mean = mean(pas_total),
                   IQR = stats::IQR(pas_total),
                   skewness = datawizard::skewness(pas_total)$Skewness,
                   kurtosis = datawizard::kurtosis(pas_total)$Kurtosis) %>% 
-  write_csv('Статистики по ЗП (уровень вовлечённости).csv')
+  write_csv('data-tables/Статистики по ЗП (уровень вовлечённости).csv')
 #График
 gam_main %>% ggplot(aes(x=pas_total)) +
   geom_histogram(aes(y=..density..)) + 
@@ -46,26 +46,26 @@ gam_main %>% ggplot(aes(x=pas_total)) +
   theme(legend.position = "none") + 
   labs(x = "Уровень вовлечённости", y = "Плотность вероятности",
        title = "Вовлечённость на выборке")
-
+ggsave('images/Вовлечённость на выборке.png')
 
 #Статистики по НП (возрастные группы)
 #По фактору чёт не очень понятно, ограничимся граффиком и ассиметрией с эксцессом
 gam_main %>% summarise(skewness = datawizard::skewness(a_g)$Skewness,
                   kurtosis = datawizard::kurtosis(a_g)$Kurtosis) %>%
-  write_csv('Статистики по НП (Возрастные группы).csv')
+  write_csv('data-tables/Статистики по НП (Возрастные группы).csv')
 #График
 gam_main %>% ggplot(aes(x=a_g)) +
   geom_bar() + 
   theme_bw() +
   labs(x = "Возрастная группа", y = "Количество респондентов",
-       title = "Распределение по возрастам")
-
+       title = "Вовлечённость на выборке")
+ggsave('images/Вовлечённость на выборке.png')
 
 #Статистики по НП (количество игр в неделю)
 #По фактору чёт не очень понятно, ограничимся граффиком и ассиметрией с эксцессом
 gam_main %>% summarise(skewness = datawizard::skewness(g_w)$Skewness,
                   kurtosis = datawizard::kurtosis(g_w)$Kurtosis) %>%
-  write_csv('Статистики по НП (количество игр в неделю).csv')
+  write_csv('data-tables/Статистики по НП (количество игр в неделю).csv')
 #График
 gam_main %>% ggplot(aes(x=g_w)) +
   geom_bar() + 
@@ -73,7 +73,7 @@ gam_main %>% ggplot(aes(x=g_w)) +
   scale_x_discrete(labels=c("1-5", "6-10", "11-20", "20-30", "> 30", "> 50")) +
   labs(x = "Количество игр в неделю", y = "Количество респондентов",
        title = "Количество игр в неделю на выборке")
-
+ggsave('images/Количество игр в неделю на выборке.png')
 
 #Статистики по НП (рейтинг - текущий)
 #Текущий рейтинг выбрали, потому что тестивароние проводится сейчас, 
@@ -88,7 +88,7 @@ gam_main %>% summarise(mean = mean(current_rating),
                   IQR = stats::IQR(current_rating),
                   skewness = datawizard::skewness(current_rating)$Skewness,
                   kurtosis = datawizard::kurtosis(current_rating)$Kurtosis) %>% 
-  write_csv('Статистики по НП (рейтинг - текущий).csv')
+  write_csv('data-tables/Статистики по НП (рейтинг - текущий).csv')
 #График
 gam_main %>% ggplot(aes(x=current_rating)) +
   geom_histogram(aes(y=..density..)) + 
@@ -100,7 +100,7 @@ gam_main %>% ggplot(aes(x=current_rating)) +
   theme(legend.position = "none") + 
   labs(x = "Текущий рейтинг", y = "Плотность вероятности",
        title = "Текущий рейтинг на выборке")
-
+ggsave('images/Текущий рейтинг на выборке.png')
 
 #Искомый график
 gam_main %>% ggplot(aes(x=current_rating, y = pas_total, color = g_w)) +
@@ -112,6 +112,7 @@ gam_main %>% ggplot(aes(x=current_rating, y = pas_total, color = g_w)) +
   geom_smooth(method = 'lm')+
   facet_wrap( ~ a_g) + 
   labs(x = "Текущий рейтинг", y = "Уровень вовлечённоси", title = "График искомых закономерностей") 
+ggsave('images/График искомых закономерностей.png')
 
 ##ЛИНЕЙНАЯ РЕГРЕССИЯ ----- 
 
@@ -230,7 +231,7 @@ gam_main %>% ggplot(aes(x=current_rating, y = pas_total)) +
   geom_point(alpha = 0.2)+
   geom_smooth(method = 'lm')+
   labs(x = "Текущий рейтинг", y = "Уровень вовлечённоси", title = "Показатель вовлечённости от рейтинга") 
-
+ggsave('images/Показатель вовлечённости от рейтинга.png')
 
 #Гипотеза о возрастных группах
 ggplot(gam_main,
@@ -239,7 +240,7 @@ ggplot(gam_main,
   stat_summary(fun.data = mean_cl_boot, geom = 'errorbar') +
   labs(x = "Возрастная группа", y = "Показатель вовлечённости",
        title = "Показатель вовлечённости среди разных возрастных групп")
-
+ggsave('images/Показатель вовлечённости среди разных возрастных групп.png')
 
 #Гипотеза об играх в неделю
 ggplot(gam_main,
@@ -249,7 +250,7 @@ ggplot(gam_main,
   labs(x = "Игр в неделю", y = "Показатель вовлечённости",
        title = "Показатель вовлечённости среди от игр в неделю") +
   scale_x_discrete(labels=c("1-5", "6-10", "11-20", "20-30", "> 30", "> 50"))
-
+ggsave('images/Показатель вовлечённости среди от игр в неделю.png')
 
 #Гипотеза о взаимодействии
 ggplot(gam_main,
@@ -261,6 +262,7 @@ ggplot(gam_main,
        title = "Показатель вовлечённости среди игроков от игр в неделю и возрастной группы") +
   scale_x_discrete(labels=c("1-5", "6-10", "11-20", "20-30", "> 30", "> 50")) +
   scale_color_manual(values = c('green', 'red', 'blue', 'orange'))
+ggsave('images/Показатель вовлечённости среди игроков от игр в неделю и возрастной группы.png')
 
 ##Таблички ----- 
 
@@ -276,26 +278,26 @@ ggplot(gam_main,
 tabl1 <- tidy(model2, conf.int = TRUE)
 save_as_docx(nice_table(tabl1, broom = "lm", 
                         note = "* p < .05, ** p < .01, *** p < .001"), 
-             path = "hyp1.docx")
+             path = "apa-tables/hyp1.docx")
 #Для второй гипотезы:
 tabl2 <- tidy(model3, conf.int = TRUE)
 save_as_docx(nice_table(tabl2, broom = "lm", 
                         note = "* p < .05, ** p < .01, *** p < .001"), 
-             path = "hyp2.docx")
+             path = "apa-tables/hyp2.docx")
 #Для третьей гипотезы:
 tabl3 <- tidy(model1, conf.int = TRUE)
 save_as_docx(nice_table(tabl3, broom = "lm", 
                         note = "* p < .05, ** p < .01, *** p < .001"), 
-             path = "hyp3.docx")
+             path = "apa-tables/hyp3.docx")
 #Для четвёртой гипотезы:
 tabl4 <- tidy(model4, conf.int = TRUE)
 save_as_docx(nice_table(tabl4, broom = "lm", 
                         note = "* p < .05, ** p < .01, *** p < .001"), 
-             path = "hyp4_1.docx")
+             path = "apa-tables/hyp4_1.docx")
 tabl5 <- tidy(model6, conf.int = TRUE)
 save_as_docx(nice_table(tabl5, broom = "lm", 
                         note = "* p < .05, ** p < .01, *** p < .001"), 
-             path = "hyp4_2.docx")
+             path = "apa-tables/hyp4_2.docx")
 
 
 #Для попарных сравнений
@@ -312,8 +314,8 @@ tabl7 <- tidy(tabl7)
 save_as_docx(nice_table(tabl6, 
                         note = c("* p < .05, ** p < .01, *** p < .001", 
                                  "P value adjustment: Tukey method for comparing a family of 4 estimates ")), 
-             path = "comp1.docx")
+             path = "apa-tables/comp1.docx")
 save_as_docx(nice_table(tabl7, 
                         note = c("* p < .05, ** p < .01, *** p < .001", 
                                  "P value adjustment: Tukey method for comparing a family of 6 estimates ")), 
-             path = "comp2.docx")
+             path = "apa-tables/comp2.docx")

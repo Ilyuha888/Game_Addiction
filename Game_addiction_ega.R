@@ -2,7 +2,7 @@ install.packages('sna')
 library(tidyverse)
 library(EGAnet)
 
-gam_ega <- read_csv2("gam_clean.csv")
+gam_ega <- read_csv2("data-tables/gam_clean.csv")
 View(gam_ega)
 str(gam_ega)
 gam_ega %>% mutate(g_w = factor(g_w,
