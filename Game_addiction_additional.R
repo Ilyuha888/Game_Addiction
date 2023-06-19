@@ -186,7 +186,7 @@ anovaBF(hours_in_game ~ class, gam_add)
 
 #Вовлечённость
 anovaBF(pas_total ~ class, gam_add)
-#BF больше 10^120 - moderate evidence в сторону альтернативной гипотезы
+#BF больше 10^120 - extreme evidence в сторону альтернативной гипотезы
 
 
 ##Сравним с обычной ановой ----- 
@@ -197,15 +197,15 @@ age_anova <- ezANOVA(gam_add, age, wid = ID, between = class)
 #p < 0.1^4
 
 #Рейтинг
-rating_anova <- ezANOVA(gam_add, age, wid = ID, between = max_rating)
+rating_anova <- ezANOVA(gam_add, max_rating, wid = ID, between = class)
 #p < 0.1^108
 
 #Часы в игре
-hours_anova <- ezANOVA(gam_add, age, wid = ID, between = hours_in_game)
+hours_anova <- ezANOVA(gam_add, hours_in_game, wid = ID, between = class)
 #p < 0.1^179
 
 #Вовлечённость
-pas_anova <- ezANOVA(gam_add, age, wid = ID, between = pas_total)
+pas_anova <- ezANOVA(gam_add, pas_total, wid = ID, between = class)
 #p < 0.1^9
 
 
