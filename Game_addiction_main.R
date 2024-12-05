@@ -4,7 +4,7 @@
 #install.packages('pwr')
 #install.packages('emmeans')
 #install.packages("rempsyc")
-#install.packages("(broom")
+#install.packages("broom")
 
 #Подгружаем библиотеки
 library(tidyverse)
