@@ -5,6 +5,7 @@
 #install.packages('emmeans')
 #install.packages("rempsyc")
 #install.packages("broom")
+#install.packages("Hmisc")
 
 #Подгружаем библиотеки
 library(tidyverse)
@@ -13,6 +14,7 @@ library(emmeans)
 library(rempsyc)
 library(broom)
 library(flextable)
+library(Hmisc)
 
 #Загружаем чистый файл
 gam_main <- read_csv2("data-tables/gam_clean.csv")
